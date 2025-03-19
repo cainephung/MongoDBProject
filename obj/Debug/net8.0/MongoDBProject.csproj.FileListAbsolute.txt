@@ -21,3 +21,4 @@
 /Users/cainephung/Documents/MongoDBProject/obj/Debug/net8.0/MongoDBProject.pdb
 /Users/cainephung/Documents/MongoDBProject/obj/Debug/net8.0/MongoDBProject.genruntimeconfig.cache
 /Users/cainephung/Documents/MongoDBProject/obj/Debug/net8.0/ref/MongoDBProject.dll
+/Users/cainephung/Documents/MongoDBProject/obj/Debug/net8.0/MongoDBProject.sourcelink.json

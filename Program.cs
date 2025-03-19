@@ -7,10 +7,33 @@ class Program
 {
     static void Main()
     {
-        string connectionString = "mongodb+srv://hphung3324:uFxirYVLEnGz6HqN@a03-movies.sok38.mongodb.net/?retryWrites=true&w=majority&appName=A03-Movies";
-        var client = new MongoClient(connectionString);
-        var database = client.GetDatabase("A03-Movies");
-        var fullMoviesCollection = database.GetCollection<BsonDocument>("fullmovies");
+        Console.Write("Enter Instructor's User ID: ");
+        string userId = Console.ReadLine()?.Trim() ?? string.Empty;
+
+        Console.Write("Enter Instructor's Password: ");
+        string password = Console.ReadLine()?.Trim() ?? string.Empty;
+
+        // Construct the MongoDB connection string using user-provided credentials
+        string connectionString = $"mongodb+srv://{userId}:{password}@a03-movies.sok38.mongodb.net/?retryWrites=true&w=majority&appName=A03-Movies";
+
+        MongoClient client;
+        try
+        {
+            client = new MongoClient(connectionString);
+            var database = client.GetDatabase("A03-Movies");
+
+            // ✅ Check if connection works
+            database.ListCollectionNames();  // This will throw an exception if credentials are invalid
+            Console.WriteLine("\n✅ Connected to MongoDB successfully!");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("\n❌ Failed to connect to MongoDB. Check your credentials.");
+            Console.WriteLine($"Error: {ex.Message}");
+            return;  // Exit program if authentication fails
+        }
+
+        var fullMoviesCollection = client.GetDatabase("A03-Movies").GetCollection<BsonDocument>("fullmovies");
 
         while (true)
         {
@@ -51,7 +74,7 @@ class Program
 
         if (movies.Count == 0)
         {
-            Console.WriteLine("\n❌ No movies found in the database!");
+            Console.WriteLine("\nNo movies found in the database!");
             return;
         }
 
@@ -66,7 +89,8 @@ class Program
                 Console.WriteLine("👥 Cast:");
                 foreach (var cast in movie["cast"].AsBsonArray)
                 {
-                    Console.WriteLine($"   🎭 {cast}");
+                    string castName = cast.AsBsonDocument.GetValue("name", "Unknown").ToString();
+                    Console.WriteLine($"   🎭 {castName}");
                 }
             }
             else
@@ -88,17 +112,17 @@ class Program
             Console.WriteLine("Invalid input. Try again.");
             return;
         }
-        var filter = Builders<BsonDocument>.Filter.ElemMatch("cast", Builders<BsonDocument>.Filter.Eq("name", castName));
 
+        var filter = Builders<BsonDocument>.Filter.ElemMatch("cast", Builders<BsonDocument>.Filter.Eq("name", castName));
         var movies = fullMoviesCollection.Find(filter).ToList();
 
         if (movies.Count == 0)
         {
-            Console.WriteLine($"\nNo movies found featuring {castName}.");
+            Console.WriteLine($"\n❌ No movies found featuring {castName}.");
             return;
         }
 
-        Console.WriteLine($"\nMovies featuring {castName}:");
+        Console.WriteLine($"\n🎭 Movies featuring {castName}:");
         foreach (var movie in movies)
         {
             string title = movie.GetValue("title", "Unknown Title").ToString();
@@ -123,7 +147,7 @@ class Program
 
         if (movies.Count == 0)
         {
-            Console.WriteLine($"\nNo movies found matching keyword '{keyword}'.");
+            Console.WriteLine($"\n❌ No movies found matching keyword '{keyword}'.");
             return;
         }
 
